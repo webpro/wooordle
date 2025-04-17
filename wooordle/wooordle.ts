@@ -275,7 +275,7 @@ class Wooordle {
     render(document.getElementById('game-board'), this.renderGameBoard());
     render(document.getElementById('game-status'), this.renderGameStatus());
     render(document.getElementById('game-score'), this.renderCurrentScore());
-    render(document.querySelector('.game-controls'), this.renderControls());
+    render(document.getElementById('game-controls'), this.renderControls());
     render(document.getElementById('high-scores'), this.renderHighScores());
 
     document.querySelector('.word-input')?.focus();

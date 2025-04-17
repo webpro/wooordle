@@ -22,13 +22,19 @@
 body {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   margin: 0;
   padding: 16px 8px;
   font-family: var(--game-font);
   background-color: var(--bg-color);
   color: var(--text-color);
+  gap: 16px;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 16px;
 }
 
@@ -148,7 +154,8 @@ output {
     --tile-size: 40px;
     --gap-size: 8px;
   }
-  body {
+  body,
+  main {
     gap: 24px;
   }
   output {
@@ -266,7 +273,7 @@ output [aria-label='wrong'] {
   align-items: center;
 }
 
-.game-controls {
+#game-controls {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -292,5 +299,23 @@ output [aria-label='wrong'] {
   100% {
     background-color: var(--reveal-color);
     transform: rotateY(0) translateZ(20px);
+  }
+}
+
+footer {
+  margin-top: 96px;
+
+  p,
+  span {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  img,
+  svg {
+    width: var(--tile-size);
+    height: var(--tile-size);
   }
 }
