@@ -46,9 +46,12 @@ main {
   perspective: 1000px;
 }
 
-#game-board.faded,
+#game-board.faded {
+  opacity: 0.3;
+}
+
 #game-status.faded {
-  opacity: 0.1;
+  opacity: 0;
 }
 
 .guess-row {
@@ -93,8 +96,8 @@ main {
 }
 
 button {
-  padding: 0.5rem 1rem;
-  font-size: 1.5rem;
+  padding: 0.7rem 1.2rem;
+  font-size: 1.3rem;
   background-color: var(--dark-grey);
   color: var(--white);
   border: none;
@@ -119,10 +122,8 @@ button:focus {
 
 #game-status {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
   margin: 8px 0 64px 0;
-  min-height: 72px;
+  min-height: 96px;
   font-size: 1.2rem;
   transition-property: opacity;
   transition-duration: 0.3s;
@@ -139,14 +140,22 @@ button:focus {
 
 output {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
   text-transform: uppercase;
-  gap: var(--gap-size);
-  max-width: 32ch;
+  gap: 8px;
   animation: fade-in 0.5s ease-in;
   font-size: 1rem;
+}
+
+output .keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+output.keyboard-qwerty .keyboard-row {
+  gap: 12px;
 }
 
 @media (min-width: 600px) {
@@ -164,7 +173,7 @@ output {
 }
 
 output [aria-label] {
-  padding: 4px 5px;
+  padding: 2px 5px;
   background-color: transparent;
   transition: background-color 0.3s;
 }
@@ -181,6 +190,10 @@ output [aria-label='present'] {
 
 output [aria-label='wrong'] {
   color: #b0b0b0;
+}
+
+output .keyboard-row:nth-child(3) span:last-child {
+  margin-right: 2rem;
 }
 
 :root[data-theme='dark'] output [aria-label='wrong'] {
@@ -245,19 +258,13 @@ output [aria-label='wrong'] {
   animation: invalid-tiles 0.2s ease-in-out;
 }
 
-.menu-container {
-  position: relative;
-  padding: 6px;
-}
-
 .menu-content {
   position: absolute;
   bottom: 64px;
-  right: 2px;
+  right: 0;
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 4px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -265,6 +272,20 @@ output [aria-label='wrong'] {
 
 .menu-content.hidden {
   display: none;
+}
+
+.menu-content button {
+  display: flex;
+  gap: 12px;
+  font-size: 1rem;
+  padding: 0.7rem 1rem;
+  align-items: baseline;
+  justify-content: flex-end;
+  text-wrap-mode: nowrap;
+}
+
+.menu-content button:hover {
+  background-color: var(--wrong-color);
 }
 
 .score-display {
@@ -275,8 +296,8 @@ output [aria-label='wrong'] {
 
 #game-controls {
   display: flex;
-  align-items: center;
   gap: 12px;
+  position: relative;
 }
 
 @keyframes reveal-tile {

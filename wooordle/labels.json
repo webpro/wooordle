@@ -1,0 +1,36 @@
+{
+  "nl": {
+    "new-game": "Nieuw Spel",
+    "switch-5": "Speel met 5 letters",
+    "switch-6": "Speel met 6 letters",
+    "switch-en": "Switch to English",
+    "switch-nl": "Switch to Dutch",
+    "switch-light": "Licht thema",
+    "switch-dark": "Donker thema",
+    "switch-qwerty": "Gebruik qwerty layout",
+    "switch-az": "Gebruik a-z layout",
+    "best": "Hoogste",
+    "settings": "Instellingen",
+    "current-streak": "Huidige reeks",
+    "current-points": "Huidige punten",
+    "current-language": "Huidige taal",
+    "best-streak": "Langste reeks",
+    "best-points": "Meeste punten"
+  },
+  "en": {
+    "new-game": "New Game",
+    "switch-5": "Switch to 5 letters",
+    "switch-6": "Switch to 6 letters",
+    "switch-en": "Switch to English",
+    "switch-nl": "Speel in het Nederlands",
+    "switch-light": "Switch to light mode",
+    "switch-dark": "Switch to dark mode",
+    "switch-qwerty": "Use qwerty layout",
+    "switch-az": "Use a-z layout",
+    "current-streak": "Current streak",
+    "current-points": "Current points",
+    "current-language": "Current language",
+    "best-streak": "Longest streak",
+    "best-points": "Most points"
+  }
+}

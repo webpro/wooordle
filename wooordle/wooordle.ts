@@ -1,14 +1,17 @@
 import { getGuessResult } from '../functions/get-guess-result.ts';
-import wordLists from './words.json';
 import { html, render } from 'uhtml';
 import { getCorrectLetters } from '../functions/get-correct-letters.ts';
 import { getMisplacedLetters } from '../functions/get-misplaced-letters.ts';
 import { getExcludedLetters } from '../functions/get-excluded-letters.ts';
 import { getLetterSet } from '../util/get-letter-set.ts';
+import wordLists from './words.json';
+import labels from './labels.json';
 
 const DEFAULT_CONFIG = {
   size: 5,
   language: 'nl',
+  keyboard: 'default',
+  theme: document.documentElement.getAttribute('data-theme') ?? 'dark',
 };
 
 const DEFAULT_STATE = {
@@ -49,12 +52,16 @@ class Wooordle {
 
   constructor() {
     document.addEventListener('click', event => {
-      if (!event.target.closest('.menu-container')) {
+      if (!event.target.closest('#game-controls')) {
         this.hideMenu();
       }
     });
 
     this.init();
+  }
+
+  get lang() {
+    return this.config.language;
   }
 
   saveConfig(config: typeof DEFAULT_CONFIG) {
@@ -77,6 +84,10 @@ class Wooordle {
     return item ? JSON.parse(item) : { ...DEFAULT_STATE };
   }
 
+  set(config: Partial<typeof DEFAULT_CONFIG>) {
+    this.saveConfig({ ...this.config, ...config });
+  }
+
   reset(config?: Partial<typeof DEFAULT_CONFIG>) {
     this.saveConfig({ ...DEFAULT_CONFIG, ...config });
     this.saveState({ ...DEFAULT_STATE, guesses: [], targetWord: null });
@@ -84,8 +95,8 @@ class Wooordle {
   }
 
   async loadLists() {
-    this.list = new Set(wordLists[this.config.language][this.config.size].target);
-    this.full = new Set(wordLists[this.config.language][this.config.size].full);
+    this.list = new Set(wordLists[this.lang][this.config.size].target);
+    this.full = new Set(wordLists[this.lang][this.config.size].full);
   }
 
   loadScores() {
@@ -95,10 +106,10 @@ class Wooordle {
 
   updateScore(won: boolean) {
     const scores = this.loadScores();
-    const currentScore = scores[this.config.language][this.config.size];
+    const currentScore = scores[this.lang][this.config.size];
     if (won) {
       currentScore.streak++;
-      currentScore.points += 6 - this.state.guesses.length + 1;
+      currentScore.points += 7 - this.state.guesses.length;
       currentScore.bestStreak = Math.max(currentScore.bestStreak, currentScore.streak);
       currentScore.bestPoints = Math.max(currentScore.bestPoints, currentScore.points);
     } else {
@@ -126,58 +137,73 @@ class Wooordle {
   }
 
   private renderCurrentScore() {
-    const currentScore = this.scores[this.config.language][this.config.size];
+    const currentScore = this.scores[this.lang][this.config.size];
     return html`
       <div class="score-display">
-        <span aria-label="Current streak">⭐ ${currentScore.streak}</span>
-        <span aria-label="Current points">🎲 ${currentScore.points}</span>
-        <span aria-label="Current language">${this.config.language === 'nl' ? '🇳🇱' : '🇬🇧'}</span>
+        <span aria-label="${labels[this.lang]['current-streak']}">⭐ ${currentScore.streak}</span>
+        <span aria-label="${labels[this.lang]['current-points']}">🎲 ${currentScore.points}</span>
+        <span aria-label="${labels[this.lang]['current-language']}">${this.lang === 'nl' ? '🇳🇱' : '🇬🇧'}</span>
       </div>
     `;
   }
 
   private renderHighScores() {
-    const currentScore = this.scores[this.config.language][this.config.size];
+    const currentScore = this.scores[this.lang][this.config.size];
     return html`<div class="score-display">
-      <span>🏆 Best</span>
-      <span aria-label="Best streak">⭐ ${currentScore.bestStreak}</span>
-      <span aria-label="Best points">🎲 ${currentScore.bestPoints}</span>
+      <span>🏆 ${labels[this.lang].best}</span>
+      <span aria-label="${labels[this.lang]['best-streak']}">⭐ ${currentScore.bestStreak}</span>
+      <span aria-label="${labels[this.lang]['best-points']}">🎲 ${currentScore.bestPoints}</span>
     </div> `;
   }
   private renderControls() {
     return html`
-      <button onclick=${() => this.reset(this.config)}>New Game</button>
-      <div class="menu-container">
-        <button aria-label="Settings" onclick=${() => this.toggleMenu()}>⚙️</button>
-        <div class="menu-content hidden">
-          <button
-            aria-label="Toggle word length"
-            onclick=${() => {
-              this.reset({ ...this.config, size: this.config.size === 5 ? 6 : 5 });
-              this.hideMenu();
-            }}
-          >
-            ${this.config.size === 5 ? '5️⃣' : '6️⃣'}
-          </button>
-          <button
-            aria-label="Toggle language"
-            onclick=${() => {
-              this.reset({ ...this.config, language: this.config.language === 'nl' ? 'en' : 'nl' });
-              this.hideMenu();
-            }}
-          >
-            ${this.config.language === 'nl' ? '🇳🇱' : '🇬🇧'}
-          </button>
-          <button
-            aria-label="Toggle theme"
-            onclick=${() => {
-              toggleTheme();
-              this.hideMenu();
-            }}
-          >
-            ${document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙'}
-          </button>
-        </div>
+      <button onclick=${() => this.reset(this.config)}>${labels[this.lang]['new-game']}</button>
+
+      <button aria-label="${labels[this.lang]['settings']}" onclick=${() => this.toggleMenu()}>⚙️</button>
+      <div class="menu-content hidden">
+        <button
+          onclick=${() => {
+            this.reset({ ...this.config, language: this.lang === 'nl' ? 'en' : 'nl' });
+            this.hideMenu();
+          }}
+        >
+          <span>${this.lang === 'nl' ? labels[this.lang]['switch-en'] : labels[this.lang]['switch-nl']}</span>
+          <span>${this.lang === 'nl' ? '🇬🇧' : '🇳🇱'}</span>
+        </button>
+        <button
+          onclick=${() => {
+            this.reset({ ...this.config, size: this.config.size === 5 ? 6 : 5 });
+            this.hideMenu();
+          }}
+        >
+          <span>${this.config.size === 5 ? labels[this.lang]['switch-6'] : labels[this.lang]['switch-5']} </span>
+          <span>${this.config.size === 5 ? '6️⃣' : '5️⃣'}</span>
+        </button>
+        <button
+          onclick=${() => {
+            this.set({ keyboard: this.config.keyboard === 'qwerty' ? 'default' : 'qwerty' });
+            this.hideMenu();
+            this.render();
+          }}
+        >
+          <span>
+            ${this.config.keyboard === 'qwerty' ? labels[this.lang]['switch-az'] : labels[this.lang]['switch-qwerty']}
+          </span>
+          <span>⌨️</span>
+        </button>
+        <button
+          onclick=${() => {
+            toggleTheme();
+            this.set({ theme: this.config.theme === 'dark' ? 'light' : 'dark' });
+            this.hideMenu();
+            this.render();
+          }}
+        >
+          <span>
+            ${this.config.theme === 'dark' ? labels[this.lang]['switch-light'] : labels[this.lang]['switch-dark']}
+          </span>
+          <span>${this.config.theme === 'dark' ? '☀️' : '🌙'}</span>
+        </button>
       </div>
     `;
   }
@@ -250,11 +276,10 @@ class Wooordle {
   }
 
   private renderLetters() {
-    if (this.state.guesses.length === 0) return '';
+    if (this.state.gameState !== 'playing') return '';
 
-    const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
-    const correct = getCorrectLetters(this.state.guesses);
-    const present = getMisplacedLetters(this.state.guesses, correct, false);
+    const correct = this.state.guesses.length === 0 ? [] : getCorrectLetters(this.state.guesses);
+    const present = this.state.guesses.length === 0 ? [] : getMisplacedLetters(this.state.guesses, correct, false);
     const wrong = getExcludedLetters(this.state.guesses, getLetterSet(correct), getLetterSet(present));
 
     const getType = (letter: string) =>
@@ -263,10 +288,29 @@ class Wooordle {
         : present.includes(letter)
           ? 'present'
           : wrong.has(letter)
-            ? 'wrong'
+            ? 'absent'
             : 'unknown';
 
-    return html`<output>${letters.map(l => html`<span aria-label="${getType(l)}">${l}</span>`)}</output>`;
+    const keyboardLayouts = {
+      default: ['abcdefghijklm', 'nopqrstuvwxyz'],
+      qwerty: ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'],
+    };
+
+    const layout = keyboardLayouts[this.config.keyboard ?? 'default'];
+
+    const className = `keyboard-${this.config.keyboard ?? 'default'}`;
+
+    return html`
+      <output class=${className}>
+        ${layout.map(
+          row => html`
+            <div class="keyboard-row">
+              ${row.split('').map(l => html` <span aria-label="${getType(l)}">${l}</span> `)}
+            </div>
+          `,
+        )}
+      </output>
+    `;
   }
 
   render() {
