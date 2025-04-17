@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wooordle</title>
+    <meta name="description" content="Play Wooordle" />
+    <script>
+      document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
+    </script>
+    <link rel="stylesheet" href="./wooordle.css" />
+    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+    <link rel="mask-icon" href="/logo.svg" color="#538d4e" />
+    <meta name="theme-color" content="#538d4e" />
+    <meta property="og:title" content="Wooordle" />
+    <meta property="og:description" content="Play Wooordle" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://wooordle.webpro.nl/wooordle.png" />
+    <meta property="og:url" content="https://wooordle.webpro.nl" />
+  </head>
+  <body>
+    <div id="game-board" role="grid" aria-label="Wordle game board"></div>
+    <div id="game-status" role="status" aria-live="polite"></div>
+    <div id="game-score" role="status" aria-live="polite"></div>
+    <div class="game-controls"></div>
+    <div id="high-scores" role="status" aria-live="polite"></div>
+    <script type="module" src="./wooordle.ts"></script>
+  </body>
+</html>

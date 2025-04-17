@@ -1,0 +1,19 @@
+{
+  "name": "@webpro/wooordle",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prebuild": "bun scripts/bundle-word-lists.ts",
+    "build": "bun --cwd wooordle vite build",
+    "dev": "bun --cwd wooordle vite"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.8",
+    "@types/node": "^22.13.15",
+    "vite": "^6.2.6",
+    "vite-plugin-pwa": "^1.0.0"
+  },
+  "dependencies": {
+    "uhtml": "^4.7.0"
+  }
+}
