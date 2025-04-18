@@ -9,6 +9,7 @@
   --game-font: 'SF Mono', 'Monaco', 'Menlo', 'Courier New', monospace;
   --bg-color: #ffffff;
   --text-color: #000000;
+  --invalid-color: #ff4444;
   --border-color: #d3d6da;
 }
 
@@ -57,7 +58,7 @@ main {
 .guess-row {
   display: grid;
   grid-template-columns: repeat(var(--word-length, 5), var(--tile-size));
-  gap: calc(2 * var(--gap-size));
+  gap: calc(var(--gap-size) + 2px);
 }
 
 .tile {
@@ -158,20 +159,6 @@ output.keyboard-qwerty .keyboard-row {
   gap: 12px;
 }
 
-@media (min-width: 600px) {
-  :root {
-    --tile-size: 40px;
-    --gap-size: 8px;
-  }
-  body,
-  main {
-    gap: 24px;
-  }
-  output {
-    max-width: 38ch;
-  }
-}
-
 output [aria-label] {
   padding: 2px 5px;
   background-color: transparent;
@@ -218,17 +205,10 @@ output .keyboard-row:nth-child(3) span:last-child {
   text-transform: uppercase;
   border: 1px solid transparent;
   background: transparent;
-  padding: 0 0.67rem;
-  letter-spacing: 1.7rem;
+  padding: 0 0.6rem;
+  letter-spacing: 1.6rem;
   z-index: 1;
   color: var(--text-color);
-}
-
-@media (min-width: 600px) {
-  .word-input {
-    padding: 0 0.8rem;
-    letter-spacing: 2.73rem;
-  }
 }
 
 .word-input:focus {
@@ -239,23 +219,49 @@ output .keyboard-row:nth-child(3) span:last-child {
   color: transparent;
 }
 
-@keyframes invalid-tiles {
+@keyframes invalid-input {
   0% {
-    background-color: lightsalmon;
-    transform: translateY(0);
+    transform: translateX(0);
+    color: var(--text-color);
   }
-  70% {
-    background-color: rgb(121, 22, 22);
-    transform: translateY(-2px);
+  20% {
+    transform: translateX(-4px);
+    color: var(--invalid-color);
+  }
+  40% {
+    transform: translateX(4px);
+    color: var(--invalid-color);
+  }
+  60% {
+    transform: translateX(-2px);
+    color: var(--invalid-color);
+  }
+  80% {
+    transform: translateX(2px);
+    color: var(--invalid-color);
   }
   100% {
-    background-color: lightsalmon;
-    transform: translateY(0);
+    transform: translateX(0);
+    color: var(--text-color);
   }
 }
 
-.guess-row.current .tile.invalid {
-  animation: invalid-tiles 0.2s ease-in-out;
+.word-input.invalid {
+  animation: invalid-input 0.6s ease-in-out;
+}
+
+@keyframes victory {
+  50% {
+    transform: rotateY(40deg);
+    transform: scale(0.5);
+  }
+}
+
+.tile.result-2.victory {
+  animation:
+    reveal-tile 0.6s ease-in forwards,
+    victory 0.8s ease-in-out forwards;
+  animation-delay: 0s, 0.6s;
 }
 
 .menu-content {
@@ -338,5 +344,33 @@ footer {
   svg {
     width: var(--tile-size);
     height: var(--tile-size);
+  }
+}
+
+@media (min-width: 600px) {
+  :root {
+    --tile-size: 40px;
+    --gap-size: 8px;
+  }
+  body,
+  main {
+    gap: 24px;
+  }
+  output {
+    max-width: 38ch;
+  }
+  .word-input {
+    padding: 0 0.8rem;
+    letter-spacing: 2.35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word-input.invalid {
+    animation: none;
+    color: #ff4444;
+  }
+  .tile.result-2.victory {
+    animation: none;
   }
 }

@@ -345,11 +345,9 @@ class Wooordle {
   submitGuess() {
     if (!this.full.has(this.state.currentGuess) && !this.list.has(this.state.currentGuess)) {
       navigator.vibrate?.(200);
-      const tiles = document.querySelectorAll('.guess-row.current .tile');
-      tiles.forEach(tile => {
-        tile.classList.add('invalid');
-        setTimeout(() => tile.classList.remove('invalid'), 600);
-      });
+      const input = document.querySelector('.word-input');
+      input.classList.add('invalid');
+      input.addEventListener('animationend', () => input.classList.remove('invalid'), { once: true });
       return;
     }
 
@@ -371,6 +369,10 @@ class Wooordle {
     this.state.currentGuess = '';
     this.saveState(this.state);
     this.render();
+
+    if (isFinished(this.state.guesses)) {
+      document.querySelectorAll('.tile.result-2').forEach(tile => tile.classList.add('victory'));
+    }
   }
 
   hideMenu() {
