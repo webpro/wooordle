@@ -5,6 +5,7 @@ export const getMisplacedLetters = (
   correctLetters: (string | undefined)[],
   fixCorrectLetters = true,
 ) => {
+  if (guesses.length === 0) return [];
   const size = guesses[0].word.length;
   const misplacedLetters: string[] = [];
   const correctLettersAmount = () => correctLetters.filter(l => l !== undefined).length;

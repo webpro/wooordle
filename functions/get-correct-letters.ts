@@ -1,6 +1,7 @@
 import type { GuessList } from '../types';
 
 export const getCorrectLetters = (guesses: GuessList) => {
+  if (guesses.length === 0) return [];
   const size = guesses[0].word.length;
   const correctLetters = Array<string | undefined>(size);
   for (const guess of guesses) {

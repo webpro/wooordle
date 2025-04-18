@@ -285,8 +285,8 @@ class Wooordle {
   private renderLetters() {
     if (this.state.gameState !== 'playing') return '';
 
-    const correct = this.state.guesses.length === 0 ? [] : getCorrectLetters(this.state.guesses);
-    const present = this.state.guesses.length === 0 ? [] : getMisplacedLetters(this.state.guesses, correct, false);
+    const correct = getCorrectLetters(this.state.guesses);
+    const present = getMisplacedLetters(this.state.guesses, correct, false);
     const wrong = getExcludedLetters(this.state.guesses, getLetterSet(correct), getLetterSet(present));
 
     const getType = (letter: string) =>
