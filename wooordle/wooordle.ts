@@ -71,7 +71,12 @@ class Wooordle {
 
   loadConfig() {
     const item = localStorage.getItem('config');
-    return item ? JSON.parse(item) : { ...DEFAULT_CONFIG };
+    try {
+      return item ? JSON.parse(item) : { ...DEFAULT_CONFIG };
+    } catch (e) {
+      localStorage.removeItem('config');
+      return { ...DEFAULT_CONFIG };
+    }
   }
 
   saveState(state: typeof DEFAULT_STATE) {
@@ -81,7 +86,12 @@ class Wooordle {
 
   loadState() {
     const item = localStorage.getItem('state');
-    return item ? JSON.parse(item) : { ...DEFAULT_STATE };
+    try {
+      return item ? JSON.parse(item) : { ...DEFAULT_STATE };
+    } catch (e) {
+      localStorage.removeItem('state');
+      return { ...DEFAULT_STATE };
+    }
   }
 
   set(config: Partial<typeof DEFAULT_CONFIG>) {
@@ -101,7 +111,12 @@ class Wooordle {
 
   loadScores() {
     const scores = localStorage.getItem('scores');
-    return scores ? JSON.parse(scores) : DEFAULT_SCORES;
+    try {
+      return scores ? JSON.parse(scores) : DEFAULT_SCORES;
+    } catch (e) {
+      localStorage.removeItem('scores');
+      return DEFAULT_SCORES;
+    }
   }
 
   updateScore(won: boolean) {
