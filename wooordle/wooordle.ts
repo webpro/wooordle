@@ -185,7 +185,7 @@ class Wooordle {
             this.hideMenu();
           }}
         >
-          <span>${this.lang === 'nl' ? labels[this.lang]['switch-en'] : labels[this.lang]['switch-nl']}</span>
+          <span>${labels[this.lang][this.lang === 'nl' ? 'switch-en' : 'switch-nl']}</span>
           <span>${this.lang === 'nl' ? '🇬🇧' : '🇳🇱'}</span>
         </button>
         <button
@@ -194,7 +194,7 @@ class Wooordle {
             this.hideMenu();
           }}
         >
-          <span>${this.config.size === 5 ? labels[this.lang]['switch-6'] : labels[this.lang]['switch-5']} </span>
+          <span>${labels[this.lang][this.config.size === 5 ? 'switch-6' : 'switch-5']}</span>
           <span>${this.config.size === 5 ? '6️⃣' : '5️⃣'}</span>
         </button>
         <button
@@ -204,9 +204,7 @@ class Wooordle {
             this.render();
           }}
         >
-          <span>
-            ${this.config.keyboard === 'qwerty' ? labels[this.lang]['switch-az'] : labels[this.lang]['switch-qwerty']}
-          </span>
+          <span> ${labels[this.lang][this.config.keyboard === 'qwerty' ? 'switch-az' : 'switch-qwerty']} </span>
           <span>⌨️</span>
         </button>
         <button
@@ -217,9 +215,7 @@ class Wooordle {
             this.render();
           }}
         >
-          <span>
-            ${this.config.theme === 'dark' ? labels[this.lang]['switch-light'] : labels[this.lang]['switch-dark']}
-          </span>
+          <span> ${labels[this.lang][this.config.theme === 'dark' ? 'switch-light' : 'switch-dark']} </span>
           <span>${this.config.theme === 'dark' ? '☀️' : '🌙'}</span>
         </button>
       </div>
@@ -246,7 +242,7 @@ class Wooordle {
       <div class="guess-row current">
         ${Array(this.config.size)
           .fill(0)
-          .map((_, i) => html` <div class="tile">${this.state.currentGuess[i] || ''}</div> `)}
+          .map((_, i) => html`<div class="tile">${this.state.currentGuess[i] || ''}</div>`)}
         <input
           type="text"
           maxlength=${this.config.size}
@@ -254,13 +250,13 @@ class Wooordle {
           autocomplete="off"
           autocapitalize="off"
           autofocus
-          onkeydown=${e => {
-            if (e.key === 'Enter' && e.target.value.length === this.config.size) {
-              this.state.currentGuess = e.target.value.toLowerCase();
+          onkeydown=${event => {
+            if (event.key === 'Enter' && event.target.value.length === this.config.size) {
+              this.state.currentGuess = event.target.value.toLowerCase();
               this.submitGuess();
-              if (this.state.currentGuess === '') e.target.value = '';
-            } else if (!/^[a-zA-Z]$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Tab') {
-              e.preventDefault();
+              if (this.state.currentGuess === '') event.target.value = '';
+            } else if (!/^[a-zA-Z]$/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Tab') {
+              event.preventDefault();
             }
           }}
         />
@@ -271,18 +267,11 @@ class Wooordle {
   private renderEmptyRows() {
     const remainingRows = ATTEMPTS - this.state.guesses.length - (this.state.gameState === 'playing' ? 1 : 0);
 
+    const rows = Array(remainingRows).fill(0);
+    const tiles = Array(this.config.size).fill(0);
+
     return html`
-      ${Array(remainingRows)
-        .fill(0)
-        .map(
-          () => html`
-            <div class="guess-row">
-              ${Array(this.config.size)
-                .fill(0)
-                .map(() => html` <div class="tile"></div> `)}
-            </div>
-          `,
-        )}
+      ${rows.map(() => html`<div class="guess-row">${tiles.map(() => html`<div class="tile"></div>`)}</div>`)}
     `;
   }
 
@@ -314,16 +303,16 @@ class Wooordle {
       qwerty: ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'],
     };
 
-    const layout = keyboardLayouts[this.config.keyboard ?? 'default'];
+    const layout: string[] = keyboardLayouts[this.config.keyboard ?? DEFAULT_CONFIG.keyboard];
 
-    const className = `keyboard-${this.config.keyboard ?? 'default'}`;
+    const className = `keyboard-${this.config.keyboard ?? DEFAULT_CONFIG.keyboard}`;
 
     return html`
       <output class=${className}>
         ${layout.map(
           row => html`
             <div class="keyboard-row">
-              ${row.split('').map(l => html` <span aria-label="${getType(l)}">${l}</span> `)}
+              ${row.split('').map(letter => html`<span aria-label="${getType(letter)}">${letter}</span>`)}
             </div>
           `,
         )}
@@ -371,7 +360,7 @@ class Wooordle {
       result: result,
     });
 
-    if (result.every(r => r === 2)) {
+    if (isFinished(this.state.guesses)) {
       this.state.gameState = 'won';
       this.updateScore(true);
     } else if (this.state.guesses.length >= ATTEMPTS) {
