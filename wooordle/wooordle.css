@@ -175,16 +175,16 @@ output [aria-label='present'] {
   color: var(--white);
 }
 
-output [aria-label='wrong'] {
-  color: #b0b0b0;
+output [aria-label='absent'] {
+  color: #dbdbdb;
 }
 
 output .keyboard-row:nth-child(3) span:last-child {
   margin-right: 2rem;
 }
 
-:root[data-theme='dark'] output [aria-label='wrong'] {
-  background-color: var(--wrong-color);
+:root[data-theme='dark'] output [aria-label='absent'] {
+  color: #484848;
 }
 
 .guess-row.current {
