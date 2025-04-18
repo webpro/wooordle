@@ -6,6 +6,9 @@ import { getExcludedLetters } from '../functions/get-excluded-letters.ts';
 import { getLetterSet } from '../util/get-letter-set.ts';
 import wordLists from './words.json';
 import labels from './labels.json';
+import { findTopWord } from '../functions/find-top-word.ts';
+import { findBestWords } from '../strategies/find-best-words.ts';
+import { isFinished } from '../functions/is-finished.ts';
 
 const DEFAULT_CONFIG = {
   size: 5,
@@ -338,6 +341,12 @@ class Wooordle {
     render(document.getElementById('high-scores'), this.renderHighScores());
 
     document.querySelector('.word-input')?.focus();
+
+    if (import.meta.env.DEV && !isFinished(this.state.guesses)) {
+      const guesses = this.state.guesses;
+      const hints = guesses.length === 0 ? [findTopWord(this.list)] : findBestWords(this.list, this.full, guesses);
+      console.log(`hint: ${hints.slice(0, 5).join(', ')}`);
+    }
   }
 
   getResultDescription(result) {
