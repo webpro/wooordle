@@ -8,7 +8,7 @@ export default defineConfig({
   },
   plugins: [
     VitePWA({
-      includeAssets: ['logo.svg', 'logo-192.png', 'logo-512.png', 'wooordle.png'],
+      includeAssets: ['logo.svg', 'wooordle-192.png', 'wooordle-512.png', 'wooordle.png'],
       registerType: 'autoUpdate',
       manifest: {
         name: 'Wooordle',
@@ -17,12 +17,12 @@ export default defineConfig({
         theme_color: '#538d4e',
         icons: [
           {
-            src: 'logo-192.png',
+            src: 'wooordle-192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: 'logo-512.png',
+            src: 'wooordle-512.png',
             sizes: '512x512',
             type: 'image/png',
           },
