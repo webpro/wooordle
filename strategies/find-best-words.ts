@@ -8,9 +8,9 @@ import { getExceedsLimit, getLetterCountLimits } from '../functions/get-letter-c
 import { getSize } from '../functions/get-size.ts';
 import { findWordsWithMostLetters } from '../functions/find-word-with-most-letters.ts';
 import type { GuessList, Run } from '../types';
-import { sortByLetterAmount } from '../functions/sort-by-letter-amount.ts';
 import { isFinished } from '../functions/is-finished.ts';
 import { getGuessResult } from '../functions/get-guess-result.ts';
+import { rankWordsByLetterFrequency } from '../functions/rank-words-by-frequency.ts';
 
 export const run: Run = ({ list, full, target, firstGuess }) => {
   let attempts = 1;
@@ -52,7 +52,7 @@ export const findBestWords = (list: Set<string>, full: Set<string>, guesses: Gue
     return filtered;
   } else {
     const presentLetters = correctLettersSet.union(misplacedLettersSet);
-    if (presentLetters.size >= size - 1 || correctLettersSet.size >= size - 2) {
+    if (presentLetters.size === size - 1 || correctLettersSet.size >= size - 2) {
       const remainingLetters = new Set<string>();
       for (const word of filtered) {
         for (let i = 0; i < word.length; i++) {
@@ -65,11 +65,12 @@ export const findBestWords = (list: Set<string>, full: Set<string>, guesses: Gue
       const prioritizedLetters = remainingLetters.difference(presentLetters);
       if (prioritizedLetters.size > 0) {
         const words = findWordsWithMostLetters(full, prioritizedLetters, excludedLettersSet);
-        if (words.length > 0) return sortByLetterAmount(words, excludedLettersSet);
+        if (words.length > 0)
+          return rankWordsByLetterFrequency(words, filtered, prioritizedLetters, excludedLettersSet);
       }
 
       const words = findWordsWithMostLetters(full, remainingLetters, excludedLettersSet);
-      return sortByLetterAmount(words, excludedLettersSet);
+      return rankWordsByLetterFrequency(words, filtered, remainingLetters, excludedLettersSet);
     }
 
     return findTopWords(new Set(filtered)).map(wordScore => wordScore.word);
