@@ -13,7 +13,7 @@ import { isFinished } from '../functions/is-finished.ts';
 const DEFAULT_CONFIG = {
   size: 5,
   language: 'nl',
-  keyboard: 'default',
+  keyboard: 'qwerty',
   theme: document.documentElement.getAttribute('data-theme') ?? 'dark',
 };
 
