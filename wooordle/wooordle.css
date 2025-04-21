@@ -364,13 +364,3 @@ footer {
     letter-spacing: 2.35rem;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .word-input.invalid {
-    animation: none;
-    color: #ff4444;
-  }
-  .tile.result-2.victory {
-    animation: none;
-  }
-}
