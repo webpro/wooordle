@@ -2,7 +2,7 @@ import { getList } from '../util/get-list';
 
 async function generateWordLists() {
   const languages = ['nl', 'en'] as const;
-  const lengths = [5, 6] as const;
+  const sizes = [5, 6] as const;
   const types = ['target', 'full'] as const;
 
   const lists = {
@@ -11,18 +11,17 @@ async function generateWordLists() {
   };
 
   for (const lang of languages) {
-    for (const length of lengths) {
+    for (const size of sizes) {
       for (const type of types) {
-        const list = await getList(lang, length, type);
-        lists[lang][length][type] = Array.from(list);
+        const list = await getList(lang, size, type);
+        lists[lang][size][type] = Array.from(list);
       }
     }
   }
 
-  return JSON.stringify(lists, null, 2);
+  return JSON.stringify(lists);
 }
 
-// Write to public/lists/words.json
 generateWordLists().then(json => {
   Bun.write('wooordle/words.json', json);
 });

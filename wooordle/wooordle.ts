@@ -277,7 +277,8 @@ class Wooordle {
 
   private renderGameStatus() {
     return html`
-      ${this.state.gameState === 'playing' ? this.renderLetters() : ''} ${this.state.gameState === 'won' ? '🎉' : ''}
+      ${this.state.gameState === 'playing' ? this.renderLetters() : ''}
+      ${this.state.gameState === 'won' ? html`🥳 🎊 👍` : ''}
       ${this.state.gameState === 'lost' ? html`🥹 ${this.state.targetWord}` : ''}
     `;
   }

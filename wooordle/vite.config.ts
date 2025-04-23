@@ -2,10 +2,6 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-  },
   plugins: [
     VitePWA({
       includeAssets: ['logo.svg', 'wooordle-192.png', 'wooordle-512.png', 'wooordle.png'],
