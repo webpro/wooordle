@@ -1,0 +1,11 @@
+packages:
+  - apps/*
+  - packages/*
+
+ignoredBuiltDependencies:
+  - esbuild
+  - workerd
+
+onlyBuiltDependencies:
+  - sharp
+  - tesseract.js
