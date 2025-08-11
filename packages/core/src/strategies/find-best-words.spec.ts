@@ -1,7 +1,7 @@
-import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { test } from 'node:test';
 import type { GuessList } from '../types';
-import { getList } from '../util/get-list.ts';
+import { getList } from '../../../dict/index.ts';
 import { findBestWords } from './find-best-words.ts';
 
 test('Find best words', async () => {

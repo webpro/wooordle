@@ -1,9 +1,9 @@
 import type { GuessList } from '../types';
 
 export const getLetterCountLimits = (guesses: GuessList): [string[], string[], string[]] => {
-  const occurOnceLetters = [];
-  const occurTwiceLetters = [];
-  const occurThriceLetters = [];
+  const occurOnceLetters: string[] = [];
+  const occurTwiceLetters: string[] = [];
+  const occurThriceLetters: string[] = [];
   for (const guess of guesses) {
     const letters = [...guess.word];
     const letterSet = new Set(letters);

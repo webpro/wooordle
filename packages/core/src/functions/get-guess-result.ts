@@ -1,4 +1,4 @@
-import type { GuessResult } from '../types.d.ts';
+import type { GuessResult } from '../types';
 
 export function getGuessResult(target: string, guess: string): GuessResult[] {
   const size = target.length;

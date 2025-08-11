@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { getGuessResult, getGuessResultSimple } from './get-guess-result.ts';
 import { getRandomWord } from './get-random-word.ts';
 import { findTopWord } from './find-top-word.ts';
-import { getList } from '../util/get-list.ts';
+import { getList } from '../../../dict/index.ts';
 
 test('Get guess result of "breed" against target "hello"', () => {
   const result = getGuessResult('hello', 'breed');

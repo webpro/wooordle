@@ -6,7 +6,6 @@ import { getExcludedLetters } from './get-excluded-letters.ts';
 import { getCorrectLetters } from './get-correct-letters.ts';
 import { getLetterSet } from '../util/get-letter-set.ts';
 import { getMisplacedLetters } from './get-misplaced-letters.ts';
-import { getList } from '../util/get-list.ts';
 
 test('Find possible words', () => {
   const list = new Set(['store', 'chore']);

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { findTopWord, findTopWords } from './find-top-word.ts';
-import { getList } from '../util/get-list.ts';
+import { getList } from '../../../dict/index.ts';
 
 const list5 = await getList('nl', 5, 'target');
 const list6 = await getList('nl', 6, 'target');

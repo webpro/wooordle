@@ -1,5 +1,5 @@
 import { styleText } from 'node:util';
-import type { GuessList, Guess } from '../types';
+import type { GuessList, Guess } from '@wooordle/core';
 
 const bgColors = ['bgBlack', 'bgYellow', 'bgGreen'];
 

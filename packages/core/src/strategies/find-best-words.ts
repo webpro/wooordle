@@ -7,10 +7,10 @@ import { findMatches } from '../functions/find-matches.ts';
 import { getExceedsLimit, getLetterCountLimits } from '../functions/get-letter-count-limits.ts';
 import { getSize } from '../functions/get-size.ts';
 import { findWordsWithMostLetters } from '../functions/find-word-with-most-letters.ts';
-import type { GuessList, Run } from '../types';
 import { isFinished } from '../functions/is-finished.ts';
 import { getGuessResult } from '../functions/get-guess-result.ts';
 import { rankWordsByLetterFrequency } from '../functions/rank-words-by-frequency.ts';
+import type { GuessList, Run } from '../types';
 
 export const run: Run = ({ list, full, target, firstGuess }) => {
   let attempts = 1;

@@ -1,4 +1,6 @@
-import { getList } from '../util/get-list';
+import { join } from 'node:path';
+import { getList } from '@wooordle/dict';
+import { writeFileSync } from 'node:fs';
 
 async function generateWordLists() {
   const languages = ['nl', 'en'] as const;
@@ -23,5 +25,6 @@ async function generateWordLists() {
 }
 
 generateWordLists().then(json => {
-  Bun.write('wooordle/words.json', json);
+  const dir = new URL('.', import.meta.url).pathname;
+  writeFileSync(join(dir, '..', 'words.json'), json);
 });

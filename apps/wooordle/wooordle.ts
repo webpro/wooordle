@@ -1,14 +1,16 @@
-import { getGuessResult } from '../functions/get-guess-result.ts';
+import {
+  findBestWords,
+  findTopWord,
+  getCorrectLetters,
+  getExcludedLetters,
+  getGuessResult,
+  getLetterSet,
+  getMisplacedLetters,
+  isFinished,
+} from '@wooordle/core';
 import { html, render } from 'uhtml';
-import { getCorrectLetters } from '../functions/get-correct-letters.ts';
-import { getMisplacedLetters } from '../functions/get-misplaced-letters.ts';
-import { getExcludedLetters } from '../functions/get-excluded-letters.ts';
-import { getLetterSet } from '../util/get-letter-set.ts';
-import wordLists from './words.json';
 import labels from './labels.json';
-import { findTopWord } from '../functions/find-top-word.ts';
-import { findBestWords } from '../strategies/find-best-words.ts';
-import { isFinished } from '../functions/is-finished.ts';
+import wordLists from './words.json';
 
 const DEFAULT_CONFIG = {
   size: 5,

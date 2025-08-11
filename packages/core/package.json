@@ -1,0 +1,13 @@
+{
+  "name": "@wooordle/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "@wooordle/dict": "workspace:*"
+  }
+}

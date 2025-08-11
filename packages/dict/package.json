@@ -1,0 +1,9 @@
+{
+  "name": "@wooordle/dict",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./*.txt": "./*.txt"
+  }
+}
