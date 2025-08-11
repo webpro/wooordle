@@ -1,0 +1,36 @@
+{
+  "name": "wooordle-advice",
+  "main": "src/worker.ts",
+  "compatibility_date": "2025-07-12",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+  },
+  "containers": [
+    {
+      "class_name": "WooordleAdviceContainer",
+      "image": "../../Dockerfile",
+      "max_instances": 1,
+    },
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "WooordleAdviceContainer",
+        "name": "OCR_CONTAINER",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "new_sqlite_classes": ["WooordleAdviceContainer"],
+      "tag": "v1",
+    },
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+    },
+  },
+}

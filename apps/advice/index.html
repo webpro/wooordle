@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wooordle Advice</title>
+    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <div class="app">
+      <main class="main">
+        <div class="main-layout">
+          <div class="input-section">
+            <div class="upload-area" id="uploadArea">
+              <div class="upload-content">
+                <h3>Upload Wooordle Screenshot</h3>
+                <p>Drag & drop, paste, or click to select a file</p>
+                <input type="file" id="fileInput" accept="image/*" hidden />
+                <button class="btn" onclick="document.getElementById('fileInput').click()">Choose File</button>
+              </div>
+              <div id="imagePreview" class="image-preview hidden"></div>
+            </div>
+          </div>
+
+          <div class="results-section">
+            <div id="analysisResults">
+              <div class="empty-state">
+                <h3>Analysis Results</h3>
+                <p>Upload a screenshot for advice</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay hidden">
+      <div class="loading-content">
+        <div class="spinner"></div>
+        <h3>Analyzing Image...</h3>
+      </div>
+    </div>
+
+    <script type="module" src="./src/client.ts"></script>
+  </body>
+</html>

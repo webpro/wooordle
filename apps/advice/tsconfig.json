@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "target": "esnext",
+    "lib": ["esnext", "DOM"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    // "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
