@@ -1,5 +1,10 @@
 # Wooordle
 
+- [Game](#game)
+- [Advice](#advice)
+- [Run simulations](#run-simulations)
+- [Algorithms](#algorithms)
+
 ## Game
 
 Play at [wooordle.webpro.nl][1]
@@ -7,29 +12,71 @@ Play at [wooordle.webpro.nl][1]
 Local development:
 
 ```sh
-bun run prebuild # once
-bun run dev
+pnpm wooordle
 ```
+
+## Advice
+
+Local development:
+
+```sh
+pnpm advice:server
+pnpm advice:client
+```
+
+- Go to [localhost:5173](http://localhost:5173) for web UI
+- Or send image to `http://localhost:8080/api/advice`
+
+Example requests:
+
+```sh
+curl -X POST http://localhost:8080/api/advice -H "Content-Type: multipart/form-data" -F "image=@./samples/wordle.jpeg"
+curl -X POST http://localhost:8080/api/advice -H "Content-Type: multipart/form-data" -F "image=@./samples/woordle.jpeg"
+curl -X POST http://localhost:8080/api/advice -H "Content-Type: multipart/form-data" -F "image=@./samples/wooordle.jpeg"
+```
+
+Example response:
+
+```json
+{
+  "analysisResult": {
+    "guesses": [
+      {
+        "word": "salet",
+        "result": [1, 0, 0, 0, 2]
+      }
+    ],
+    "wordLength": 5,
+    "detectedLanguages": ["nl", "en"],
+    "bestWords": {
+      "nl": ["worst", "borst", "dorst", "korst", "vorst"],
+      "en": ["foist", "joist", "moist", "hoist", "worst"]
+    }
+  }
+}
+```
+
+Example using an iPhone Shortcut (actived by "Double Back Tap"):
+
+https://github.com/user-attachments/assets/d2015e0f-ae3b-47cb-a4a0-fa299cd8e7da
 
 ## Run simulations
 
-Use Bun, tsx or Node.js:
+Use Node.js v24:
 
 ```sh
-bun simulations/solve-random-word.ts
-npx tsx simulations/solve-random-word.ts
-node --experimental-strip-types --disable-warning=ExperimentalWarning simulations/solve-random-word.ts
+node packages/core/src/simulations/solve-random-word.ts
 ```
 
 Other available simulations:
 
 ```sh
-bun simulations/find-best-words.ts
-bun simulations/find-possible-words.ts
+node packages/core/src/simulations/find-best-words.ts
+node packages/core/src/simulations/find-possible-words.ts
 ```
 
 - Runs 2315 games with English 5-letter words
-- Dutch and 6-letter word listsre also available
+- Dutch and 6-letter word lists are also available
 
 ## Algorithms
 
