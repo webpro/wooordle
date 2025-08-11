@@ -1,0 +1,26 @@
+#!/bin/bash
+args=()
+skip_next=false
+
+for arg in "$@"; do
+    if [ "$skip_next" = true ]; then
+        skip_next=false
+        continue
+    fi
+
+    case "$arg" in
+        --provenance* | --sbom* | --attestation*)
+            if [[ "$arg" == *"="* ]]; then
+                continue
+            else
+                skip_next=true
+                continue
+            fi
+            ;;
+        *)
+            args+=("$arg")
+            ;;
+    esac
+done
+
+exec podman "${args[@]}"
