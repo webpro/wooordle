@@ -1,0 +1,19 @@
+{
+  "name": "@wooordle/ocr",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Wordle OCR-based analysis",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@wooordle/core": "workspace:*",
+    "@wooordle/dict": "workspace:*",
+    "sharp": "^0.34.3",
+    "tesseract.js": "^6.0.1"
+  },
+  "trustedDependencies": [
+    "sharp"
+  ]
+}
