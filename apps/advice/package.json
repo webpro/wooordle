@@ -12,16 +12,16 @@
     "deploy": "pnpm build:client && pnpm build && wrangler deploy"
   },
   "dependencies": {
-    "@cloudflare/containers": "^0.0.25",
-    "@hono/node-server": "^1.18.1",
+    "@cloudflare/containers": "^0.0.31",
+    "@hono/node-server": "^1.19.8",
     "@wooordle/ocr": "workspace:*",
-    "hono": "^4.9.0"
+    "hono": "^4.11.4"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250810.0",
+    "@cloudflare/workers-types": "^4.20260113.0",
     "@types/node": "^24.2.1",
-    "typescript": "^5.9.2",
-    "vite": "^7.1.1",
-    "wrangler": "^4.28.1"
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "wrangler": "^4.58.0"
   }
 }

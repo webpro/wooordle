@@ -10,8 +10,8 @@
   "dependencies": {
     "@wooordle/core": "workspace:*",
     "@wooordle/dict": "workspace:*",
-    "sharp": "^0.34.3",
-    "tesseract.js": "^6.0.1"
+    "sharp": "^0.34.5",
+    "tesseract.js": "^7.0.0"
   },
   "trustedDependencies": [
     "sharp"
