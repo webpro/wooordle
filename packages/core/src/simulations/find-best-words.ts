@@ -2,8 +2,8 @@ import { getList } from '@wooordle/dict';
 import { run } from '../strategies/find-best-words.ts';
 import { printResults } from '../util/printer.ts';
 
-const list = await getList('en', 5, 'target');
-const full = await getList('en', 5, 'full');
+const list = await getList('nl', 6, 'target');
+const full = await getList('nl', 6, 'full');
 
 const results = new Map<number, number>();
 
