@@ -6,8 +6,10 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "scripts": {
+    "test": "node --test src/**/*.spec.ts"
+  },
   "devDependencies": {
-    "@types/node": "^24.2.1",
     "@wooordle/dict": "workspace:*"
   }
 }

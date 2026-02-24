@@ -1,7 +1,7 @@
 import { calculateLetterFrequency } from './calculate-letter-frequency.ts';
 import { calculatePositionFrequency } from './calculate-position-frequency.ts';
 
-export interface WordScore {
+interface WordScore {
   word: string;
   score: number;
   variations?: WordScore[];

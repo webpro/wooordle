@@ -10,6 +10,12 @@
     "prewooordle": "pnpm -F @webpro/wooordle prebuild",
     "wooordle": "pnpm -F @webpro/wooordle dev",
     "advice:server": "pnpm -F @wooordle/advice dev",
-    "advice:client": "pnpm -F @wooordle/advice dev:client"
+    "advice:client": "pnpm -F @wooordle/advice dev:client",
+    "knip": "knip"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "knip": "^5.85.0",
+    "typescript": "^5.9.3"
   }
 }

@@ -1,0 +1,11 @@
+{
+  "workspaces": {
+    "packages/core": {
+      "entry": ["src/simulations/*.ts"]
+    },
+    "apps/advice": {
+      "entry": ["src/worker.ts"],
+      "ignoreBinaries": ["podman"]
+    }
+  }
+}

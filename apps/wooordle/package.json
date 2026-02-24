@@ -11,7 +11,6 @@
     "ocr"
   ],
   "devDependencies": {
-    "@types/node": "^24.2.1",
     "vite": "^7.3.1",
     "vite-plugin-pwa": "^1.2.0"
   },
