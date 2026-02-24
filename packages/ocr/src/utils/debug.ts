@@ -2,11 +2,12 @@ import { basename, join } from 'node:path';
 import type sharp from 'sharp';
 import type { Box, Point } from '../types.ts';
 
-const _points: Point[] = [];
-const _boxes: Box[] = [];
+let _points: Point[] = [];
+let _boxes: Box[] = [];
 
-export function addPoint(point: Point) {
-  _points.push(point);
+export function resetDebug() {
+  _points = [];
+  _boxes = [];
 }
 
 export function addBox(box: Box) {

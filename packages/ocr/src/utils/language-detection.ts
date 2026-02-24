@@ -1,4 +1,4 @@
-import { findBestWords } from '@wooordle/core';
+import { entropy as findBestWords } from '@wooordle/core';
 import type { GuessList, LANGUAGE } from '@wooordle/core';
 import { getList } from '@wooordle/dict';
 

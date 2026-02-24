@@ -70,43 +70,22 @@ export async function analyze(
 
     if (tileBoxes.length === 0) throw new Error('No tiles found in image.');
 
-    const wordLength = tileBoxes.length > 30 ? 6 : 5;
-    const numRows = wordLength > 0 ? Math.ceil(tileBoxes.length / wordLength) : 6;
+    const wordLength = new Set(tileBoxes.map(t => t.left)).size as 5 | 6;
+    const numRows = Math.ceil(tileBoxes.length / wordLength);
+    const colorMap: Record<string, GuessResult> = { green: 2, yellow: 1, grey: 0, unknown: 0 };
     const tileRows: { box: Box; color: GuessResult }[][] = Array.from({ length: numRows }, () => []);
-    let actualRows = 0;
 
     for (const [i, box] of tileBoxes.entries()) {
       const rowIndex = Math.floor(i / wordLength);
-      const colIndex = i % wordLength;
-
-      if (rowIndex < numRows) {
-        if (!tileRows[rowIndex]) {
-          tileRows[rowIndex] = [];
-        }
-
-        const colorName = await getTileColor(image.clone().extract(box), box.width, box.height, debug, i, wordLength);
-
-        if (colIndex === 0 && colorName === 'unknown') {
-          if (debug) console.log(`finished tile processing (tile ${rowIndex + 1}:1 empty)\n`);
-          actualRows = rowIndex;
-          break;
-        }
-
-        const colorMap: { [key: string]: GuessResult } = { green: 2, yellow: 1, grey: 0, unknown: 0 };
-        const color = colorMap[colorName];
-        tileRows[rowIndex].push({ box, color });
-
-        actualRows = Math.max(actualRows, rowIndex + 1);
-      }
+      const colorName = await getTileColor(image.clone().extract(box), box.width, box.height, debug, i, wordLength);
+      tileRows[rowIndex].push({ box, color: colorMap[colorName] });
     }
-
-    const filledRows = tileRows.slice(0, actualRows);
 
     const ocrDictionary = await getOcrDictionary(lang, wordLength as 5 | 6);
 
     const guesses: GuessList = [];
 
-    for (const [i, tilesInRow] of filledRows.entries()) {
+    for (const [i, tilesInRow] of tileRows.entries()) {
       if (tilesInRow.length === 0) continue;
 
       const rowBox = {
@@ -141,7 +120,7 @@ export async function analyze(
         })),
       );
 
-      const rowImage = sharp(await rowCompositeImage.jpeg().toBuffer()).withMetadata({ density: 72 });
+      const rowImage = sharp(await rowCompositeImage.png().toBuffer()).withMetadata({ density: 300 });
 
       const ocr = await recognizeWord(rowImage, ocrDictionary, worker, debug, tmpDir, i);
 
