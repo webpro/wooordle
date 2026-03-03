@@ -20,7 +20,7 @@ test('Find best words (entropy) — suggests optimal first word', async () => {
   const list = await getList('en', 5, 'target');
   const full = await getList('en', 5, 'full');
   const bestWords = entropy(list, full, []);
-  assert.equal(bestWords.length, 1);
+  assert(bestWords.length <= 3);
   assert.equal(bestWords[0], 'raise');
 });
 
@@ -31,7 +31,7 @@ test('Find best words (entropy) — entropy scoring with many remaining', async 
     { word: 'salet', result: [0, 0, 1, 0, 0] },
   ];
   const bestWords = entropy(list, full, guesses);
-  assert.equal(bestWords.length, 1);
+  assert(bestWords.length <= 3);
   assert.equal(bestWords[0], 'cloud');
 });
 
@@ -39,7 +39,7 @@ test('Find best words (entropy) — 6-letter suggests optimal first word', async
   const list = await getList('en', 6, 'target');
   const full = await getList('en', 6, 'full');
   const bestWords = entropy(list, full, []);
-  assert.equal(bestWords.length, 1);
+  assert(bestWords.length <= 3);
   assert.equal(bestWords[0], 'saline');
 });
 
@@ -50,6 +50,6 @@ test('Find best words (entropy) — 6-letter narrows candidates', async () => {
     { word: 'saline', result: [0, 0, 0, 0, 0, 2] },
   ];
   const bestWords = entropy(list, full, guesses);
-  assert.equal(bestWords.length, 1);
+  assert(bestWords.length <= 3);
   assert.equal(bestWords[0].length, 6);
 });

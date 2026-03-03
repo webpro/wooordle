@@ -46,16 +46,17 @@ function pattern(ti: number, gi: number): number {
   return result;
 }
 
-function bestGuess(
+function bestGuesses(
   candidates: Uint16Array,
   nCandidates: number,
   pool: Uint16Array,
   nPool: number,
   isCandidate: Uint8Array,
-): number {
+  n = 1,
+): number[] {
   const counts = new Uint32Array(patternCount);
-  let bestScore = Infinity;
-  let bestIdx = pool[0];
+  const topScores = new Array<number>(n).fill(Infinity);
+  const topIdx = new Array<number>(n).fill(pool[0]);
 
   for (let p = 0; p < nPool; p++) {
     const gi = pool[p];
@@ -70,13 +71,19 @@ function bestGuess(
       score += v * v;
     }
 
-    if (score < bestScore || (score === bestScore && isCandidate[gi])) {
-      bestScore = score;
-      bestIdx = gi;
+    let pos = -1;
+    for (let k = n - 1; k >= 0; k--) {
+      if (score < topScores[k] || (score === topScores[k] && isCandidate[gi] && !isCandidate[topIdx[k]])) pos = k;
+      else break;
+    }
+    if (pos >= 0) {
+      for (let k = n - 1; k > pos; k--) { topScores[k] = topScores[k - 1]; topIdx[k] = topIdx[k - 1]; }
+      topScores[pos] = score;
+      topIdx[pos] = gi;
     }
   }
 
-  return bestIdx;
+  return topIdx;
 }
 
 function init(list: Set<string>, full: Set<string>, firstGuess: string, deep = false) {
@@ -121,7 +128,7 @@ function init(list: Set<string>, full: Set<string>, firstGuess: string, deep = f
     }
     isCandidate.fill(0);
     for (let i = 0; i < n; i++) isCandidate[candidates[i]] = 1;
-    guess2Lookup.set(p, bestGuess(candidates, n, fullPool, fullCount, isCandidate));
+    guess2Lookup.set(p, bestGuesses(candidates, n, fullPool, fullCount, isCandidate)[0]);
   }
 
   const runGame: Run = ({ target, firstGuess: fg }) => {
@@ -161,11 +168,11 @@ function init(list: Set<string>, full: Set<string>, firstGuess: string, deep = f
         for (let i = 0; i < nCandidates; i++) isCandidate[candidates[i]] = 1;
 
         if (deep && nCandidates <= 20) {
-          guessIdx = bestGuess(candidates, nCandidates, fullPool, fullCount, isCandidate);
+          guessIdx = bestGuesses(candidates, nCandidates, fullPool, fullCount, isCandidate)[0];
         } else if (nCandidates <= 10) {
-          guessIdx = bestGuess(candidates, nCandidates, targetPool, targetCount, isCandidate);
+          guessIdx = bestGuesses(candidates, nCandidates, targetPool, targetCount, isCandidate)[0];
         } else {
-          guessIdx = bestGuess(candidates, nCandidates, candidates, nCandidates, isCandidate);
+          guessIdx = bestGuesses(candidates, nCandidates, candidates, nCandidates, isCandidate)[0];
         }
       }
 
@@ -227,8 +234,8 @@ export function entropy(list: Set<string>, full: Set<string>, guesses: GuessList
     nPool = nCandidates;
   }
 
-  const best = bestGuess(candidates, nCandidates, pool, nPool, isCandidate);
-  return [wordStrings[best]];
+  const best = bestGuesses(candidates, nCandidates, pool, nPool, isCandidate, 3);
+  return best.map(idx => wordStrings[idx]);
 }
 
 let _cached: { list: Set<string>; full: Set<string>; firstGuess: string; game: Run } | null = null;
