@@ -9,8 +9,9 @@
   "scripts": {
     "prewooordle": "pnpm -F @webpro/wooordle prebuild",
     "wooordle": "pnpm -F @webpro/wooordle dev",
-    "advice:server": "pnpm -F @wooordle/advice dev",
-    "advice:client": "pnpm -F @wooordle/advice dev:client",
+    "advice:server": "pnpm -F @wooordle/advice run dev",
+    "advice:client": "pnpm -F @wooordle/advice run dev:client",
+    "advice:deploy": "pnpm -F @wooordle/advice run deploy",
     "knip": "knip"
   },
   "devDependencies": {
