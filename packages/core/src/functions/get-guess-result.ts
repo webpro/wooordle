@@ -14,7 +14,7 @@ export function getGuessResult(target: string, guess: string): GuessResult[] {
     }
   }
 
-  for (let i = 0; i < size; i++) {
+  for (let i = size - 1; i >= 0; i--) {
     if (guessLetters[i] === '*') continue;
     const targetIndex = targetLetters.indexOf(guessLetters[i]);
     if (targetIndex !== -1) {

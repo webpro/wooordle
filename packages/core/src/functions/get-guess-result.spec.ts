@@ -7,7 +7,7 @@ import { getList } from '../../../dict/index.ts';
 
 test('Get guess result of "breed" against target "hello"', () => {
   const result = getGuessResult('hello', 'breed');
-  assert.deepEqual(result, [0, 0, 1, 0, 0]);
+  assert.deepEqual(result, [0, 0, 0, 1, 0]);
 });
 
 test('Get naive/incorrect guess result of "breed" against target "hello"', () => {

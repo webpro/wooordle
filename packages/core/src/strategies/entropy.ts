@@ -38,7 +38,7 @@ function pattern(ti: number, gi: number): number {
     if (letters[go + i] === letters[to + i]) result += multipliers[i] * 2;
     else tc[letters[to + i]]++;
   }
-  for (let i = 0; i < ws; i++) {
+  for (let i = ws - 1; i >= 0; i--) {
     const g = letters[go + i];
     if (letters[go + i] !== letters[to + i] && tc[g] > 0) { result += multipliers[i]; tc[g]--; }
   }
