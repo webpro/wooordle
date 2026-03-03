@@ -14,7 +14,7 @@ import wordLists from './words.json';
 
 const DEFAULT_CONFIG = {
   size: 5,
-  language: 'nl',
+  language: navigator.language.startsWith('nl') ? 'nl' : 'en',
   keyboard: 'qwerty',
   theme: document.documentElement.getAttribute('data-theme') ?? 'dark',
 };
