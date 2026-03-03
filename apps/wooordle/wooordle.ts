@@ -1,6 +1,5 @@
 import {
-  findBestWords,
-  findTopWord,
+  entropy,
   getCorrectLetters,
   getExcludedLetters,
   getGuessResult,
@@ -335,9 +334,8 @@ class Wooordle {
     document.querySelector('.word-input')?.focus();
 
     if (import.meta.env.DEV && !isFinished(this.state.guesses)) {
-      const guesses = this.state.guesses;
-      const hints = guesses.length === 0 ? [findTopWord(this.list)] : findBestWords(this.list, this.full, guesses);
-      console.log(`hint: ${hints.slice(0, 5).join(', ')}`);
+      const hints = entropy(this.list, this.full, this.state.guesses);
+      console.log(`hint: ${hints.join(', ')}`);
     }
   }
 
