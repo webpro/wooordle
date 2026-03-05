@@ -295,6 +295,8 @@ function findTileRowsFromCenter(
   colSpacing: number,
   tileWidth: number,
   debug: boolean,
+  gridYStart: number,
+  gridYEnd: number,
 ): { top: number; height: number }[] | null {
   const gapW = colSpacing - tileWidth;
   const numCols = colGaps.length + 1;
@@ -338,6 +340,8 @@ function findTileRowsFromCenter(
   const threshold = 10;
   const minBandHeight = Math.round(tileWidth * 0.3);
   const maxBandHeight = Math.round(colSpacing * 1.05);
+  const minRowY = gridYStart - 2 * colSpacing;
+  const maxRowY = gridYEnd + colSpacing;
   const bands: { top: number; bottom: number }[] = [];
   let inBand = false, bandTop = 0;
 
@@ -349,7 +353,8 @@ function findTileRowsFromCenter(
     } else if (v <= threshold && inBand) {
       inBand = false;
       const h = y - bandTop;
-      if (h >= minBandHeight && h <= maxBandHeight) bands.push({ top: bandTop, bottom: y });
+      if (h >= minBandHeight && h <= maxBandHeight && bandTop >= minRowY && bandTop <= maxRowY)
+        bands.push({ top: bandTop, bottom: y });
     }
   }
 
@@ -470,7 +475,7 @@ function detectGridInRange(
   tileWidth = estimateTileSize(vProfile, colGaps, colSpc);
 
   let numCols = colGaps.length + 1;
-  const rowBands = findTileRowsFromCenter(gray, width, height, colGaps, colSpc, tileWidth, debug);
+  const rowBands = findTileRowsFromCenter(gray, width, height, colGaps, colSpc, tileWidth, debug, vYStart, vYEnd);
   if (!rowBands || rowBands.length === 0) {
     if (debug) console.log('no tile rows found');
     return [];
