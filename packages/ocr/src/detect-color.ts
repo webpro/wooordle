@@ -1,4 +1,4 @@
-import type { Sharp } from 'sharp';
+import sharp, { type Sharp } from 'sharp';
 
 export async function getTileColor(
   tileImage: Sharp,
@@ -14,10 +14,10 @@ export async function getTileColor(
   }
 
   const insetRegion = {
-    left: Math.floor(tileWidth * 0.15),
-    top: Math.floor(tileHeight * 0.15),
-    width: Math.floor(tileWidth * 0.2),
-    height: Math.floor(tileHeight * 0.2),
+    left: Math.floor(tileWidth * 0.1),
+    top: Math.floor(tileHeight * 0.1),
+    width: Math.floor(tileWidth * 0.8),
+    height: Math.floor(tileHeight * 0.8),
   };
 
   if (insetRegion.width <= 0 || insetRegion.height <= 0) {
@@ -28,20 +28,8 @@ export async function getTileColor(
 
   const { data, info } = await tileImage.clone().extract(insetRegion).raw().toBuffer({ resolveWithObject: true });
 
-  let totalR = 0,
-    totalG = 0,
-    totalB = 0;
-  const pixelCount = data.length / info.channels;
-
-  for (let i = 0; i < data.length; i += info.channels) {
-    totalR += data[i];
-    totalG += data[i + 1];
-    totalB += data[i + 2];
-  }
-
-  const r = Math.round(totalR / pixelCount);
-  const g = Math.round(totalG / pixelCount);
-  const b = Math.round(totalB / pixelCount);
+  const { dominant } = await sharp(data, { raw: info }).stats();
+  const { r, g, b } = dominant;
 
   const color = determineColorFromStats(r, g, b);
 
