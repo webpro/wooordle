@@ -1,5 +1,6 @@
 {
   "name": "wooordle-advice",
+  "account_id": "2a89625197605034a7e0aae5af99b6cf",
   "main": "src/worker.ts",
   "compatibility_date": "2025-07-12",
   "assets": {

@@ -14,3 +14,11 @@ podman build -f ../../Dockerfile -t wooordle-advice ../..
 podman run -p 8080:8080 wooordle-advice
 podman run -it --rm wooordle-advice /bin/bash
 ```
+
+Build and deploy to Cloudflare with Podman:
+
+```sh
+pnpm run deploy
+```
+
+Test the deployment flow without publishing: `pnpm test`.

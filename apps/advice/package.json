@@ -8,8 +8,9 @@
     "dev:client": "vite",
     "build": "podman build -f ../../Dockerfile -t wooordle-advice ../..",
     "build:client": "vite build",
+    "test": "node --test scripts/deploy.spec.mjs",
     "type-check": "tsc",
-    "deploy": "pnpm build:client && pnpm build && wrangler deploy"
+    "deploy": "pnpm build:client && pnpm build --platform linux/amd64 && node scripts/deploy.mjs wooordle-advice"
   },
   "dependencies": {
     "@cloudflare/containers": "^0.3.7",
