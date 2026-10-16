@@ -81,7 +81,7 @@ node packages/core/src/simulations/entropy.ts salet
 
 ## Algorithms
 
-Advice and development hints use the entropy strategy, which minimizes the expected number of remaining candidates.
+Advice and development hints use the entropy strategy, which ranks allowed guesses by expected information gain.
 
 - Dimitris Bertsimas and Alex Paskov
   - Article: [An Exact and Interpretable Solution to Wordle][8]
@@ -93,7 +93,7 @@ Advice and development hints use the entropy strategy, which minimizes the expec
   - Average: 3.556-3.769
 - Lars Kappert
   - [Letter frequency][12]: average 3.60
-  - [Entropy][13]: average 3.45
+  - [Entropy][13]: average 3.43
 
 [1]: #game
 [2]: #advice

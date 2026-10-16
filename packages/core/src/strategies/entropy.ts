@@ -1,249 +1,195 @@
-import type { GuessList, Run } from '../types';
+import type { GuessList, Run } from '../types.ts';
 
-const tc = new Uint8Array(26);
+function createSolver(list: Set<string>, full: Set<string>) {
+  const words = [...list, ...full.difference(list)];
+  const wordSize = words[0].length;
+  const patternCount = 3 ** wordSize;
+  const allGreen = patternCount - 1;
+  const wordIndex = new Map(words.map((word, i) => [word, i]));
+  const letters = new Uint8Array(words.length * wordSize);
+  const letterCounts = new Uint8Array(26);
+  const letterMasks = new Uint32Array(words.length);
+  const hasUniqueLetters = new Uint8Array(words.length);
+  const multipliers = new Uint16Array(wordSize);
+  const targets = Uint32Array.from({ length: list.size }, (_, i) => i);
+  const nextGuesses = new Map<string, number>();
 
-let letters: Uint8Array;
-let wordStrings: string[];
-let targetCount: number;
-let fullCount: number;
-let wordSize: number;
-let patternCount: number;
-let allGreen: number;
-let multipliers: Uint16Array;
-
-function encodeWords(targets: string[], fulls: string[]) {
-  const targetSet = new Set(targets);
-  const extra = fulls.filter(w => !targetSet.has(w));
-  wordStrings = [...targets, ...extra];
-  targetCount = targets.length;
-  fullCount = wordStrings.length;
-  wordSize = wordStrings[0].length;
-  patternCount = 3 ** wordSize;
-  allGreen = patternCount - 1;
-  multipliers = new Uint16Array(wordSize);
-  for (let i = wordSize - 1, m = 1; i >= 0; i--, m *= 3) multipliers[i] = m;
-  letters = new Uint8Array(fullCount * wordSize);
-  for (let i = 0; i < fullCount; i++) {
-    const w = wordStrings[i];
-    const off = i * wordSize;
-    for (let j = 0; j < wordSize; j++) letters[off + j] = w.charCodeAt(j) - 97;
-  }
-}
-
-function pattern(ti: number, gi: number): number {
-  const ws = wordSize;
-  const to = ti * ws, go = gi * ws;
-  let result = 0;
-  for (let i = 0; i < ws; i++) {
-    if (letters[go + i] === letters[to + i]) result += multipliers[i] * 2;
-    else tc[letters[to + i]]++;
-  }
-  for (let i = ws - 1; i >= 0; i--) {
-    const g = letters[go + i];
-    if (letters[go + i] !== letters[to + i] && tc[g] > 0) { result += multipliers[i]; tc[g]--; }
-  }
-  for (let i = 0; i < ws; i++) tc[letters[to + i]] = 0;
-  return result;
-}
-
-function bestGuesses(
-  candidates: Uint16Array,
-  nCandidates: number,
-  pool: Uint16Array,
-  nPool: number,
-  isCandidate: Uint8Array,
-  n = 1,
-): number[] {
-  const counts = new Uint32Array(patternCount);
-  const topScores = new Array<number>(n).fill(Infinity);
-  const topIdx = new Array<number>(n).fill(pool[0]);
-
-  for (let p = 0; p < nPool; p++) {
-    const gi = pool[p];
-    counts.fill(0);
-    for (let c = 0; c < nCandidates; c++) {
-      counts[pattern(candidates[c], gi)]++;
+  for (let i = wordSize - 1, multiplier = 1; i >= 0; i--, multiplier *= 3) multipliers[i] = multiplier;
+  for (let i = 0; i < words.length; i++) {
+    let mask = 0;
+    hasUniqueLetters[i] = 1;
+    for (let j = 0; j < wordSize; j++) {
+      const letter = words[i].charCodeAt(j) - 97;
+      const bit = 1 << letter;
+      if (mask & bit) hasUniqueLetters[i] = 0;
+      mask |= bit;
+      letters[i * wordSize + j] = letter;
     }
-
-    let score = 0;
-    for (let i = 0; i < patternCount; i++) {
-      const v = counts[i];
-      score += v * v;
-    }
-
-    let pos = -1;
-    for (let k = n - 1; k >= 0; k--) {
-      if (score < topScores[k] || (score === topScores[k] && isCandidate[gi] && !isCandidate[topIdx[k]])) pos = k;
-      else break;
-    }
-    if (pos >= 0) {
-      for (let k = n - 1; k > pos; k--) { topScores[k] = topScores[k - 1]; topIdx[k] = topIdx[k - 1]; }
-      topScores[pos] = score;
-      topIdx[pos] = gi;
-    }
+    letterMasks[i] = mask;
   }
 
-  return topIdx;
-}
-
-function init(list: Set<string>, full: Set<string>, firstGuess: string, deep = false) {
-  const targetArr = [...list];
-  const fullArr = [...full];
-  encodeWords(targetArr, fullArr);
-
-  const wordIndex = new Map<string, number>();
-  for (let i = 0; i < fullCount; i++) wordIndex.set(wordStrings[i], i);
-
-  const firstGuessIdx = wordIndex.get(firstGuess)!;
-
-  const fullPool = new Uint16Array(fullCount);
-  for (let i = 0; i < fullCount; i++) fullPool[i] = i;
-
-  const targetPool = new Uint16Array(targetCount);
-  for (let i = 0; i < targetCount; i++) targetPool[i] = i;
-
-  const tmpGroups = new Map<number, number[]>();
-  for (let i = 0; i < targetCount; i++) {
-    const p = pattern(i, firstGuessIdx);
-    let g = tmpGroups.get(p);
-    if (!g) { g = []; tmpGroups.set(p, g); }
-    g.push(i);
-  }
-
-  const groups = new Map<number, Uint16Array>();
-  const groupSizes = new Map<number, number>();
-  for (const [p, arr] of tmpGroups) {
-    groups.set(p, Uint16Array.from(arr));
-    groupSizes.set(p, arr.length);
-  }
-
-  const guess2Lookup = new Map<number, number>();
-  const isCandidate = new Uint8Array(fullCount);
-
-  for (const [p, candidates] of groups) {
-    const n = groupSizes.get(p)!;
-    if (n <= 2) {
-      guess2Lookup.set(p, candidates[0]);
-      continue;
+  function encodeGuess(word: string) {
+    const index = wordIndex.get(word);
+    if (index !== undefined) return { letters, offset: index * wordSize };
+    if (word.length !== wordSize) throw new RangeError('Expected a ' + wordSize + '-letter guess: ' + word);
+    const encoded = new Uint8Array(wordSize);
+    for (let i = 0; i < wordSize; i++) {
+      const letter = word.charCodeAt(i) - 97;
+      if (letter < 0 || letter >= 26) throw new RangeError('Expected lowercase letters: ' + word);
+      encoded[i] = letter;
     }
-    isCandidate.fill(0);
-    for (let i = 0; i < n; i++) isCandidate[candidates[i]] = 1;
-    guess2Lookup.set(p, bestGuesses(candidates, n, fullPool, fullCount, isCandidate)[0]);
+    return { letters: encoded, offset: 0 };
   }
 
-  const runGame: Run = ({ target, firstGuess: fg }) => {
-    const targetIdx = wordIndex.get(target)!;
-    let candidates = targetPool.slice();
-    let nCandidates = targetCount;
-    let attempts = 1;
-    let guessIdx = wordIndex.get(fg)!;
-    let isFirst = true;
-
-    while (attempts <= 10) {
-      const p = pattern(targetIdx, guessIdx);
-      if (p === allGreen) return attempts;
-
-      let j = 0;
-      for (let i = 0; i < nCandidates; i++) {
-        const ci = candidates[i];
-        if (ci !== guessIdx && pattern(ci, guessIdx) === p) {
-          candidates[j++] = ci;
-        }
+  function pattern(target: number, guessLetters: Uint8Array, guessOffset: number): number {
+    const targetOffset = target * wordSize;
+    let result = 0;
+    for (let i = 0; i < wordSize; i++) {
+      if (guessLetters[guessOffset + i] === letters[targetOffset + i]) result += multipliers[i] * 2;
+      else letterCounts[letters[targetOffset + i]]++;
+    }
+    for (let i = wordSize - 1; i >= 0; i--) {
+      const letter = guessLetters[guessOffset + i];
+      if (letter !== letters[targetOffset + i] && letterCounts[letter] > 0) {
+        result += multipliers[i];
+        letterCounts[letter]--;
       }
-      nCandidates = j;
-
-      if (nCandidates === 0) return attempts + 1;
-      if (nCandidates <= 2) {
-        guessIdx = candidates[0];
-        attempts++;
-        isFirst = false;
-        continue;
-      }
-
-      if (isFirst) {
-        guessIdx = guess2Lookup.get(p) ?? candidates[0];
-        isFirst = false;
-      } else {
-        isCandidate.fill(0);
-        for (let i = 0; i < nCandidates; i++) isCandidate[candidates[i]] = 1;
-
-        if (deep && nCandidates <= 20) {
-          guessIdx = bestGuesses(candidates, nCandidates, fullPool, fullCount, isCandidate)[0];
-        } else if (nCandidates <= 10) {
-          guessIdx = bestGuesses(candidates, nCandidates, targetPool, targetCount, isCandidate)[0];
-        } else {
-          guessIdx = bestGuesses(candidates, nCandidates, candidates, nCandidates, isCandidate)[0];
-        }
-      }
-
-      attempts++;
     }
-
-    return undefined as unknown as number;
-  };
-
-  return runGame;
-}
-
-export function entropy(list: Set<string>, full: Set<string>, guesses: GuessList): string[] {
-  const targetArr = [...list];
-  const fullArr = [...full];
-  encodeWords(targetArr, fullArr);
-
-  const wordIndex = new Map<string, number>();
-  for (let i = 0; i < fullCount; i++) wordIndex.set(wordStrings[i], i);
-
-  const targetPool = new Uint16Array(targetCount);
-  for (let i = 0; i < targetCount; i++) targetPool[i] = i;
-
-  let candidates = targetPool.slice();
-  let nCandidates = targetCount;
-
-  for (const guess of guesses) {
-    const gi = wordIndex.get(guess.word);
-    if (gi === undefined) continue;
-    const r = guess.result;
-    let p = 0;
-    for (let i = 0; i < wordSize; i++) p += r[i] * multipliers[i];
-
-    let j = 0;
-    for (let i = 0; i < nCandidates; i++) {
-      const ci = candidates[i];
-      if (ci !== gi && pattern(ci, gi) === p) candidates[j++] = ci;
-    }
-    nCandidates = j;
-  }
-
-  if (nCandidates === 0) return [];
-  if (nCandidates <= 2) {
-    const result: string[] = [];
-    for (let i = 0; i < nCandidates; i++) result.push(wordStrings[candidates[i]]);
+    for (let i = 0; i < wordSize; i++) letterCounts[letters[targetOffset + i]] = 0;
     return result;
   }
 
-  const isCandidate = new Uint8Array(fullCount);
-  for (let i = 0; i < nCandidates; i++) isCandidate[candidates[i]] = 1;
-
-  let pool: Uint16Array;
-  let nPool: number;
-  if (nCandidates <= 10) {
-    pool = targetPool;
-    nPool = targetCount;
-  } else {
-    pool = candidates.slice(0, nCandidates);
-    nPool = nCandidates;
+  function filter(candidates: Uint32Array, guess: ReturnType<typeof encodeGuess>, result: number) {
+    let count = 0;
+    for (const candidate of candidates) {
+      if (pattern(candidate, guess.letters, guess.offset) === result) candidates[count++] = candidate;
+    }
+    return candidates.subarray(0, count);
   }
 
-  const best = bestGuesses(candidates, nCandidates, pool, nPool, isCandidate, 3);
-  return best.map(idx => wordStrings[idx]);
+  function uniqueGuessPattern(target: number, guessOffset: number): number {
+    const targetOffset = target * wordSize;
+    const mask = letterMasks[target];
+    let result = 0;
+    for (let i = 0; i < wordSize; i++) {
+      const letter = letters[guessOffset + i];
+      if (letter === letters[targetOffset + i]) result += multipliers[i] * 2;
+      else if (mask & (1 << letter)) result += multipliers[i];
+    }
+    return result;
+  }
+
+  function bestGuesses(candidates: Uint32Array, limit = 3): number[] {
+    const count = candidates.length;
+    if (count <= 2) return Array.from(candidates.subarray(0, limit));
+
+    const isCandidate = new Uint8Array(words.length);
+    for (const candidate of candidates) isCandidate[candidate] = 1;
+    const counts = new Uint32Array(patternCount);
+    const bucketSizes = new Uint32Array(count + 1);
+    const weights = new Float64Array(count + 1);
+    for (let i = 2; i <= count; i++) weights[i] = i * Math.log2(i);
+    const topScores: number[] = [];
+    const topIndices: number[] = [];
+
+    for (let guess = 0; guess < words.length; guess++) {
+      counts.fill(0);
+      bucketSizes.fill(0);
+      let maxBucket = 0;
+      for (const candidate of candidates) {
+        const feedback = hasUniqueLetters[guess]
+          ? uniqueGuessPattern(candidate, guess * wordSize)
+          : pattern(candidate, letters, guess * wordSize);
+        const previous = counts[feedback]++;
+        if (previous > 0) bucketSizes[previous]--;
+        bucketSizes[previous + 1]++;
+        if (previous + 1 > maxBucket) maxBucket = previous + 1;
+      }
+
+      // Minimizing sum(n * log2(n)) maximizes entropy for a fixed candidate count.
+      // Sum equal-sized buckets together so equivalent partitions tie exactly.
+      let score = 0;
+      for (let size = 2; size <= maxBucket; size++) score += bucketSizes[size] * weights[size];
+
+      let position = topScores.length;
+      while (position > 0) {
+        const previous = position - 1;
+        if (score < topScores[previous] ||
+          (score === topScores[previous] && isCandidate[guess] && !isCandidate[topIndices[previous]])) position--;
+        else break;
+      }
+      if (position < limit) {
+        topScores.splice(position, 0, score);
+        topIndices.splice(position, 0, guess);
+        if (topScores.length > limit) {
+          topScores.pop();
+          topIndices.pop();
+        }
+      }
+    }
+
+    return topIndices;
+  }
+
+  function suggest(guesses: GuessList): string[] {
+    let candidates: Uint32Array = targets.slice();
+    for (const guess of guesses) {
+      let result = 0;
+      for (let i = 0; i < wordSize; i++) result += guess.result[i] * multipliers[i];
+      if (result === allGreen) return [];
+      candidates = filter(candidates, encodeGuess(guess.word), result);
+      if (candidates.length === 0) return [];
+    }
+    return bestGuesses(candidates).map(index => words[index]);
+  }
+
+  function runGame(target: string, firstGuess: string): number {
+    const targetIndex = wordIndex.get(target);
+    if (targetIndex === undefined || targetIndex >= targets.length) throw new RangeError('Unknown target: ' + target);
+    let candidates: Uint32Array = targets.slice();
+    let guess = encodeGuess(firstGuess);
+    let attempts = 1;
+
+    while (true) {
+      const result = pattern(targetIndex, guess.letters, guess.offset);
+      if (result === allGreen) return attempts;
+      candidates = filter(candidates, guess, result);
+
+      let next: number;
+      if (candidates.length <= 2) next = candidates[0];
+      else {
+        const key = candidates.join(',');
+        const cached = nextGuesses.get(key);
+        if (cached !== undefined) next = cached;
+        else {
+          next = bestGuesses(candidates, 1)[0];
+          nextGuesses.set(key, next);
+        }
+      }
+      guess = { letters, offset: next * wordSize };
+      attempts++;
+    }
+  }
+
+  return { suggest, runGame };
 }
 
-let _cached: { list: Set<string>; full: Set<string>; firstGuess: string; game: Run } | null = null;
+export function entropy(list: Set<string>, full: Set<string>, guesses: GuessList): string[] {
+  if (list.size === 0) return [];
+  return createSolver(list, full).suggest(guesses);
+}
 
-export const run: Run = (opts) => {
-  const c = _cached;
-  if (!c || c.list !== opts.list || c.full !== opts.full || c.firstGuess !== opts.firstGuess) {
-    _cached = { list: opts.list, full: opts.full!, firstGuess: opts.firstGuess, game: init(opts.list, opts.full!, opts.firstGuess) };
+let cached: {
+  list: Set<string>;
+  full: Set<string>;
+  firstGuess: string;
+  solver: ReturnType<typeof createSolver>;
+} | undefined;
+
+export const run: Run = ({ list, full = list, target, firstGuess }) => {
+  if (list.size === 0) throw new RangeError('Cannot simulate an empty target list.');
+  if (!cached || cached.list !== list || cached.full !== full || cached.firstGuess !== firstGuess) {
+    cached = { list, full, firstGuess, solver: createSolver(list, full) };
   }
-  return _cached!.game(opts);
+  return cached.solver.runGame(target, firstGuess);
 };
