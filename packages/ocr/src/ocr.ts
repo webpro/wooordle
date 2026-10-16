@@ -1,6 +1,5 @@
 import { join } from 'node:path';
-import type sharp from 'sharp';
-import type Tesseract from 'tesseract.js';
+import sharp, { type Sharp } from 'sharp';
 import type { Worker as TesseractWorker } from 'tesseract.js';
 
 type OCRResult = {
@@ -9,31 +8,35 @@ type OCRResult = {
   method: string;
 };
 
-function channelNegate(rowImage: sharp.Sharp, channel: 'red' | 'green' | 'blue') {
+function channelNegate(rowImage: Sharp, channel: 'red' | 'green' | 'blue') {
   return rowImage.clone().extractChannel(channel).normalise().negate();
 }
 
 async function recognize(
-  rowImage: sharp.Sharp,
+  rowImage: Sharp,
   channel: 'red' | 'green' | 'blue',
   worker: TesseractWorker,
   debug: boolean,
   tmpDir: string,
   rowIndex: number,
   idx: number,
+  binarize = false,
 ): Promise<OCRResult | null> {
   try {
-    const image = channelNegate(rowImage, channel);
-    if (debug) await image.clone().png().toFile(join(tmpDir, `row-${rowIndex}-${idx}-${channel}.png`));
+    let image = channelNegate(rowImage, channel);
+    // Materialize the channel so Sharp applies thresholding after normalization and inversion.
+    if (binarize) image = sharp(await image.png().toBuffer()).threshold();
+    const method = binarize ? `${channel}-threshold` : channel;
+    if (debug) await image.clone().png().toFile(join(tmpDir, `row-${rowIndex}-${idx}-${method}.png`));
     const result = await worker.recognize(await image.png().toBuffer());
     const word = result.data.text.trim().replace(/\s/g, '').toLowerCase();
-    return { word, confidence: result.data.confidence, method: channel };
+    return { word, confidence: result.data.confidence, method };
   } catch {}
   return null;
 }
 
 export async function tryOCRMethods(
-  rowImage: sharp.Sharp,
+  rowImage: Sharp,
   fullList: Set<string>,
   worker: TesseractWorker,
   debug: boolean,
@@ -57,5 +60,9 @@ export async function tryOCRMethods(
 
   if (debug) console.log(' '.repeat(27), byConfidence.map(r => `${r.method}:${r.word}:${r.confidence}`).join(', '));
 
-  return byConfidence.filter(r => fullList.has(r.word)).at(0) ?? { word: '', confidence: 0, method: 'FAILED' };
+  const best = byConfidence.find(r => fullList.has(r.word));
+  if (best) return best;
+
+  const binary = await recognize(rowImage, 'blue', worker, debug, tmpDir, rowIndex, 4, true);
+  return binary && fullList.has(binary.word) ? binary : { word: '', confidence: 0, method: 'FAILED' };
 }
