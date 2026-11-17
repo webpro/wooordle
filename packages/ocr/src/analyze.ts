@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, rmSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import sharp from 'sharp';
+import sharp, { type Sharp } from 'sharp';
 import { createWorker, PSM } from 'tesseract.js';
 import { getTileColor } from './detect-color.ts';
 import { detectGrid } from './detect-grid.ts';
@@ -42,15 +42,27 @@ async function getWorker(langs: string[]): Promise<TesseractWorker> {
   return sharedWorkerPromise;
 }
 
+async function isEmptyGrid(image: Sharp, tiles: Box[]): Promise<boolean> {
+  for (const tile of tiles) {
+    const inset = {
+      left: tile.left + Math.floor(tile.width * 0.2),
+      top: tile.top + Math.floor(tile.height * 0.2),
+      width: Math.floor(tile.width * 0.6),
+      height: Math.floor(tile.height * 0.6),
+    };
+    const { data, info } = await image.clone().extract(inset).raw().toBuffer({ resolveWithObject: true });
+    const { channels } = await sharp(data, { raw: info }).stats();
+    if (channels.some(channel => channel.max - channel.min > 10)) return false;
+  }
+  return true;
+}
+
 export async function analyze(
   imagePath: string,
   imageBuffer: Buffer,
   lang?: LANGUAGE,
   debug = false,
 ): Promise<AnalysisResult> {
-  const langs = lang ? [langMap[lang]] : Object.values(langMap);
-  const worker = await getWorker(langs);
-
   if (debug) {
     if (existsSync(tmpDir)) for (const file of readdirSync(tmpDir)) rmSync(join(tmpDir, file));
     else mkdirSync(tmpDir);
@@ -70,7 +82,16 @@ export async function analyze(
 
     if (tileBoxes.length === 0) throw new Error('No tiles found in image.');
 
-    const wordLength = new Set(tileBoxes.map(t => t.left)).size as 5 | 6;
+    const wordLength = new Set(tileBoxes.map(t => t.left)).size;
+    if (wordLength !== 5 && wordLength !== 6) throw new Error('Expected a five- or six-column grid.');
+
+    if (await isEmptyGrid(image, tileBoxes)) {
+      const languageResult = await detectLanguageAndGetSuggestions([], wordLength, lang);
+      return { guesses: [], wordLength, ...languageResult };
+    }
+
+    const langs = lang ? [langMap[lang]] : Object.values(langMap);
+    const worker = await getWorker(langs);
     const numRows = Math.ceil(tileBoxes.length / wordLength);
     const colorMap: Record<string, GuessResult> = { green: 2, yellow: 1, grey: 0, unknown: 0 };
     const tileRows: { box: Box; color: GuessResult }[][] = Array.from({ length: numRows }, () => []);

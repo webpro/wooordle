@@ -287,7 +287,7 @@ function extendGaps(
   return result;
 }
 
-function findTileRowsFromCenter(
+function findTileRows(
   gray: Uint8Array,
   width: number,
   height: number,
@@ -297,6 +297,7 @@ function findTileRowsFromCenter(
   debug: boolean,
   gridYStart: number,
   gridYEnd: number,
+  sampleBorders = false,
 ): { top: number; height: number }[] | null {
   const gapW = colSpacing - tileWidth;
   const numCols = colGaps.length + 1;
@@ -318,11 +319,17 @@ function findTileRowsFromCenter(
     if (bgHist[i] > bgCount) { bgCount = bgHist[i]; bgLevel = i; }
   }
 
-  const n = sampleXs.length;
+  const rowSampleXs = sampleBorders ? colGaps : sampleXs;
+  const n = rowSampleXs.length;
   const diffs = new Float64Array(n);
   const rawProfile = new Float64Array(height);
   for (let y = 0; y < height; y++) {
-    for (let i = 0; i < n; i++) diffs[i] = Math.abs(gray[y * width + sampleXs[i]] - bgLevel);
+    for (let i = 0; i < n; i++) {
+      const x = rowSampleXs[i];
+      diffs[i] = Math.abs(gray[y * width + x] - bgLevel);
+      if (sampleBorders && x + 1 < width)
+        diffs[i] = Math.max(diffs[i], Math.abs(gray[y * width + x + 1] - bgLevel));
+    }
     diffs.sort();
     rawProfile[y] = diffs[1];
   }
@@ -475,7 +482,10 @@ function detectGridInRange(
   tileWidth = estimateTileSize(vProfile, colGaps, colSpc);
 
   let numCols = colGaps.length + 1;
-  const rowBands = findTileRowsFromCenter(gray, width, height, colGaps, colSpc, tileWidth, debug, vYStart, vYEnd);
+  let rowBands = findTileRows(gray, width, height, colGaps, colSpc, tileWidth, debug, vYStart, vYEnd);
+  const outlined = !rowBands;
+  if (outlined)
+    rowBands = findTileRows(gray, width, height, colGaps, colSpc, tileWidth, debug, vYStart, vYEnd, true);
   if (!rowBands || rowBands.length === 0) {
     if (debug) console.log('no tile rows found');
     return [];
@@ -483,21 +493,23 @@ function detectGridInRange(
 
   const tileHeight = Math.min(tileWidth, ...rowBands.map(b => b.height));
   const gapW = colSpc - tileWidth;
-  const originX = Math.round(colGaps[0] - tileWidth - gapW / 2);
+  let originX = Math.round(colGaps[0] - tileWidth - gapW / 2);
 
   const lastBand = rowBands[rowBands.length - 1];
-  const sampleY = rowBands[0].top + Math.round(rowBands[0].height * 0.15);
+  const sampleY = rowBands[0].top + (outlined ? 2 : Math.round(rowBands[0].height * 0.15));
   const bgRefY = Math.min(height - 1, lastBand.top + lastBand.height + Math.round(colSpc * 0.3));
-  while (numCols > 4) {
-    const cx = originX + (numCols - 1) * colSpc + Math.floor(tileWidth / 2);
-    if (cx < 0 || cx >= width) { numCols--; continue; }
+  function hasColumn(col: number) {
+    const cx = originX + col * colSpc + Math.floor(tileWidth / 2);
+    if (cx < 0 || cx >= width) return false;
     const tileVal = gray[sampleY * width + cx];
     const bgVal = gray[bgRefY * width + cx];
-    if (Math.abs(tileVal - bgVal) < 15) {
-      if (debug) console.log(`  trimming empty col ${numCols} (tile=${tileVal}, bg=${bgVal})`);
-      numCols--;
-    } else break;
+    return Math.abs(tileVal - bgVal) >= 15;
   }
+  while (outlined && numCols > 4 && !hasColumn(0)) {
+    originX += colSpc;
+    numCols--;
+  }
+  while (numCols > 4 && !hasColumn(numCols - 1)) numCols--;
 
   if (debug) {
     console.log(`grid: ${numCols}×${rowBands.length}`);

@@ -7,6 +7,9 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "scripts": {
+    "test": "node --experimental-test-module-mocks --test src/**/*.spec.ts"
+  },
   "dependencies": {
     "@wooordle/core": "workspace:*",
     "@wooordle/dict": "workspace:*",
